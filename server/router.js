@@ -126,7 +126,7 @@ const userRequestAccepted = async(req, res) => {
 
 const generateKeyPair = async (req, res) => {
   const {name} = req.query;
-  const isUserPresentWithTheGivenName = await axios.findOne({name});
+  const isUserPresentWithTheGivenName = await Configuration.findOne({name});
   if(isUserPresentWithTheGivenName) {
     return res.json({message:"user with the given name already exists, use a different name", key:2});
   }

@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
 
 const userConfigurationSchema = new mongoose.Schema({
-    key:{
-        type:Number,
-        required:true,
-        unique:true
+    publicKey: {
+        type: String,
+        required: true,
+        unique: true
     },
-    name:{
-        type:String,
-        required:true,
+    name: {
+        type: String,
+        required: true
     }
-})
+});
 
-const userConfiguration = mongoose.model('Configuration', userConfigurationSchema);
+const UserConfiguration = mongoose.model('UserConfiguration', userConfigurationSchema);
 
-module.exports = userConfiguration;
+module.exports = UserConfiguration;

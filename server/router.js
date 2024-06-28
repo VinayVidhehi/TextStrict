@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Configuration = require("./models/userConfiguration_schema");
 const Request = require("./models/userRequest_schema");
+const crypto = require('crypto');
 require('dotenv').config();
 
 mongoose
@@ -122,4 +123,47 @@ const userRequestAccepted = async(req, res) => {
   }
 }
 
-module.exports = {handleUserConfiguration, fetchRequestedUsers, removeUserFromRequestList, findUser, sendFollowRequest, userRequestAccepted};
+
+const generateKeyPair = async (req, res) => {
+  const {name} = req.query;
+  const isUserPresentWithTheGivenName = await axios.findOne({name});
+  if(isUserPresentWithTheGivenName) {
+    return res.json({message:"user with the given name already exists, use a different name", key:2});
+  }
+  else {
+    crypto.generateKeyPair('rsa', {
+      modulusLength: 4096,
+      publicKeyEncoding: {
+        type: 'spki',
+        format: 'pem'
+      },
+      privateKeyEncoding: {
+        type: 'pkcs8',
+        format: 'pem',
+        cipher: 'aes-256-cbc',
+        passphrase: process.env.PASSPHRASE // Use environment variables for better security
+      }
+    }, async (err, publicKey, privateKey) => {
+      if (err) {
+        return res.status(500).json({ error: 'Key generation failed', details: err.message });
+      }
+  
+      // Store the keys in AsyncStorage or another secure location
+      try {
+        const userConfiguration = new Configuration({
+          publicKey: publicKey,
+          name,
+        });
+  
+        await userConfiguration.save();
+  
+        // Send the public key back in the response
+        res.status(200).json({message:"your key pair is successfully created", keys:{publicKey, privateKey}, key:1});
+      } catch (storageError) {
+        res.status(500).json({ error: 'Failed to store keys', details: storageError.message , key:0});
+      }
+    });
+  }
+};
+
+module.exports = {handleUserConfiguration, fetchRequestedUsers, removeUserFromRequestList, findUser, sendFollowRequest, userRequestAccepted, generateKeyPair };

@@ -13,6 +13,7 @@ const {
   findUser,
   sendFollowRequest,
   userRequestAccepted,
+  generateKeyPair,
 } = require("./router");
 
 app.use(cors());
@@ -59,6 +60,8 @@ app.post("/api/request-accepted", userRequestAccepted);
 app.get("/api/fetch-users", fetchRequestedUsers);
 // notify the sender that their friend request was accepted
 app.get("/api/request-accepted", removeUserFromRequestList);
+//get set of public private keys
+app.get("/api/get-key", generateKeyPair);
 
 http.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
